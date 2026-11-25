@@ -1,7 +1,67 @@
-export default function App() {
+import { useMemo, useState } from 'react'
+import type { SwapiClient } from './api/swapiClient'
+import type { SwapiPerson } from './api/types'
+import { CharacterList } from './components/CharacterList'
+import { StatusMessage } from './components/StatusMessage'
+import { useAsync } from './hooks/useAsync'
+import './App.css'
+
+interface AppProps {
+  /** Injected so tests can supply a fake API without network access. */
+  client: SwapiClient
+}
+
+export default function App({ client }: AppProps) {
+  const people = useAsync(() => client.getPeople(), [client])
+  const [selected, setSelected] = useState<SwapiPerson | null>(null)
+
+  const sortedPeople = useMemo(
+    () =>
+      people.status === 'success'
+        ? [...people.data].sort((a, b) => a.name.localeCompare(b.name))
+        : [],
+    [people],
+  )
+
   return (
-    <main>
-      <h1>Star Wars Character Datapad</h1>
-    </main>
+    <div className="app">
+      <header className="app__header">
+        <h1>Star Wars Character Datapad</h1>
+      </header>
+
+      <main className="app__main">
+        <section className="app__sidebar" aria-labelledby="characters-heading">
+          <h2 id="characters-heading" className="section-title">
+            Characters
+          </h2>
+          <div className="panel panel--list">
+            {people.status === 'loading' && <StatusMessage kind="loading" message="Loading characters…" />}
+            {people.status === 'error' && (
+              <StatusMessage kind="error" message={people.error.message} onRetry={people.retry} />
+            )}
+            {people.status === 'success' && sortedPeople.length === 0 && (
+              <StatusMessage kind="empty" message="No characters are available." />
+            )}
+            {people.status === 'success' && sortedPeople.length > 0 && (
+              <CharacterList
+                characters={sortedPeople}
+                selectedUrl={selected?.url ?? null}
+                onSelect={setSelected}
+              />
+            )}
+          </div>
+        </section>
+
+        <section className="app__detail" aria-label="Character details">
+          <div className="panel">
+            {selected ? (
+              <h2 className="character-name">{selected.name}</h2>
+            ) : (
+              <StatusMessage kind="empty" message="Select a character to see their details." />
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
   )
 }
