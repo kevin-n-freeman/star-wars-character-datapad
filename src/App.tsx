@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { SwapiClient } from './api/swapiClient'
 import type { SwapiPerson } from './api/types'
+import { CharacterDetails } from './components/CharacterDetails'
 import { CharacterList } from './components/CharacterList'
 import { SearchBox } from './components/SearchBox'
 import { StatusMessage } from './components/StatusMessage'
@@ -63,7 +64,7 @@ export default function App({ client }: AppProps) {
         <section className="app__detail" aria-label="Character details">
           <div className="panel">
             {selected ? (
-              <h2 className="character-name">{selected.name}</h2>
+              <CharacterDetails key={selected.url} person={selected} client={client} />
             ) : (
               <StatusMessage kind="empty" message="Select a character to see their details." />
             )}
