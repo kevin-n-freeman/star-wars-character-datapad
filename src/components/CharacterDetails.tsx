@@ -29,7 +29,7 @@ export function CharacterDetails({ person, client }: Props) {
               [
                 'Birth year',
                 formatText(person.birth_year),
-                'BBY/ABY = Years Before(B) or Years After(A) the Battle of Yavin (BY). This is standard representation of the Star Wars calendar.',
+                'BBY/ABY = Years Before(B) or Years After(A) the Battle of Yavin (BY). This is the standard representation of the Star Wars calendar.',
               ],
               ['Gender', formatText(person.gender)],
               ['Height', formatNumber(person.height, 'cm')],
