@@ -29,7 +29,7 @@ export function CharacterDetails({ person, client }: Props) {
               [
                 'Birth year',
                 formatText(person.birth_year),
-                'BBY / ABY = years before / after the Battle of Yavin, the Star Wars calendar. Luke Skywalker (19BBY) was born 19 years before it.',
+                'BBY/ABY = Years Before(B) or Years After(A) the Battle of Yavin (BY). This is standard representation of the Star Wars calendar.',
               ],
               ['Gender', formatText(person.gender)],
               ['Height', formatNumber(person.height, 'cm')],

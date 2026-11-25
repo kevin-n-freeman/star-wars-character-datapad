@@ -50,7 +50,7 @@ describe('CharacterDetails', () => {
 
     const attributes = section(/attributes/i)
     expect(within(attributes).getByText('19BBY')).toBeInTheDocument()
-    expect(within(attributes).getByText(/years before \/ after the Battle of Yavin/i)).toBeInTheDocument()
+    expect(within(attributes).getByText(/Years Before\(B\) or Years After\(A\) the Battle of Yavin/)).toBeInTheDocument()
   })
 
   it('shows "Unknown" instead of raw API placeholders', () => {
