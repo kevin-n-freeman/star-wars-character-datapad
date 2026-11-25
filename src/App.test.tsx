@@ -63,3 +63,37 @@ describe('App: search', () => {
     expect(screen.getByText(/no characters match "jabba"/i)).toBeInTheDocument()
   })
 })
+
+describe('App: end-to-end flow with a fake API', () => {
+  it('searches, selects a character and shows details plus related information', async () => {
+    const user = userEvent.setup()
+    const TATOOINE = 'https://swapi.test/api/planets/1'
+    const XWING = 'https://swapi.test/api/starships/12'
+    const newHope = { title: 'A New Hope', episode_id: 4, release_date: '', url: 'https://swapi.test/api/films/1' }
+    const client = createFakeClient({
+      people: [
+        makePerson({ name: 'Han Solo' }),
+        makePerson({
+          name: 'Luke Skywalker',
+          homeworld: TATOOINE,
+          films: [newHope.url],
+          starships: [XWING],
+        }),
+      ],
+      films: [newHope],
+      resources: {
+        [TATOOINE]: { name: 'Tatooine', population: '200000', url: TATOOINE },
+        [XWING]: { name: 'X-wing', crew: '1', passengers: '0', model: 'T-65', manufacturer: 'Incom', url: XWING },
+      },
+    })
+    render(<App client={client} />)
+
+    await user.type(await screen.findByRole('searchbox'), 'luke')
+    await user.click(screen.getByRole('button', { name: 'Luke Skywalker' }))
+
+    expect(await screen.findByText('Tatooine')).toBeInTheDocument()
+    expect(await screen.findByText('A New Hope')).toBeInTheDocument()
+    expect(await screen.findByText('X-wing')).toBeInTheDocument()
+    expect(screen.getByText(/does not pilot any vehicles/i)).toBeInTheDocument()
+  })
+})
