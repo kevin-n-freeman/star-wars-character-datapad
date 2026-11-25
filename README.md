@@ -188,7 +188,7 @@ In priority order:
 - Made the judgment calls, for example the display rule for missing data ("Unknown" for single values, "None listed" for empty lists) rather than guessing "Human", and keeping the dependency list small.
 
 **How the output was validated:**
-- **Automated checks on every change:** lint, type check, 40 tests, and a production build. GitHub Actions repeats these on every push.
+- **Automated checks on every change:** lint, type check, 41 tests, and a production build. GitHub Actions repeats these on every push.
 - **Visual check:** the built app was run against local sample data in Chrome and compared with the wireframe.
 - **Corrections during review:** for example, a test for an "unknown" homeworld caught that card titles showed the raw API text "unknown" instead of "Unknown", which was then fixed. Also, the linter flagged that the first version of the loading hook updated state in a way React discourages. It was rewritten so a slow response for a previous character can never overwrite the current one, and a test was added to prove it.
 
@@ -207,6 +207,7 @@ Every push runs lint, type checks, all tests and a production build in GitHub Ac
 | 5 | Delivery lead review | Work plan notes read like a list of problems rather than design reasons | Column renamed "Why it matters" and entries reworded | `8e5b0dc` |
 | 6 | Delivery lead review | Risk that readers think sample data could be shown to users when the API is down | Clarified that sample data is used only by the tests; the app always uses the live API and shows an error instead | `8e5b0dc` |
 | 7 | GitHub Actions | One manual GitHub Pages deployment failed with a temporary GitHub error (deployment artifact not found) | Re-ran the deployment with no code change; it succeeded | n/a |
+| 8 | Delivery lead review (live demo) | Birth years such as "19BBY" and "41.9BBY" are correct but unclear to anyone who doesn't know the Star Wars calendar. A usability gap, not a data error | Added a small "i" next to "Birth year" that explains BBY / ABY (before / after the Battle of Yavin) on hover or keyboard focus, and to screen readers | `a08999a` |
 
 ## Guidance for the next engineer
 
