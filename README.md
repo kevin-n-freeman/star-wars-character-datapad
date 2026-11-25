@@ -11,6 +11,8 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 > - **"Unknown"** for a single value that is missing or marked unknown: attributes, species, homeworld and homeworld details. Every character has a species and a homeworld; we just aren't told which.
 > - **"None listed"** for an empty list: films, starships and vehicles. An empty list may mean "pilots nothing" or "not recorded", and the API doesn't say which, so the wording claims neither.
 > - **"N/A"** where the API says a value doesn't apply (for example, a droid's hair color).
+>
+> When there is **no record at all** (no species given), the app says "Unknown" once, rather than listing six fields that would all read "Unknown". When there **is** a record with gaps (a homeworld with an unknown population), the app shows the record and marks each gap.
 
 ---
 
@@ -19,6 +21,7 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 - [Running the app](#running-the-app)
 - [Running the tests](#running-the-tests)
 - [Requirements coverage](#requirements-coverage)
+- [API conditions found](#api-conditions-found-and-how-the-app-handles-them)
 - [Work plan](#work-plan)
 - [Technical approach and architecture](#technical-approach-and-architecture)
 - [Key decisions, tradeoffs and alternatives](#key-decisions-tradeoffs-and-alternatives)
@@ -79,6 +82,30 @@ The tests never call the real API. They use an in-memory fake client (`src/test/
 | Clearly communicate loading, empty and error states | Acceptance criteria on #3, #4, #5 and #6, with error handling and retries in #2 |
 
 "Single-page view" is read as one screen layout that works for any character, with Luke Skywalker as the wireframe's example. Films, starships and vehicles are shown on that page, not on separate pages, per the instructions.
+
+---
+
+## API conditions found and how the app handles them
+
+While building and reviewing the app, I checked the wireframe against what the API actually returns. Each condition below was found in the data or the API's behavior, and the app handles it deliberately.
+
+| Condition found | What the app does | Why |
+|---|---|---|
+| Every value is text, even numbers (`"172"`, `"200000"`) | Formats values with units and thousands separators (172 cm, 200,000) | Readable values; no raw API text on screen |
+| Some numbers already contain commas (Jabba the Hutt's mass is `"1,358"`) | The formatter accepts both forms | Avoids showing "NaN" or a wrong number |
+| Missing values arrive as `"unknown"`, `"n/a"` or empty | One display rule: "Unknown", "N/A", "None listed" (see Finding above) | Consistent and honest; never invents data |
+| Species is empty for most humans, including Luke, though the wireframe shows "Human" | Shows "Unknown" | The API doesn't say; guessing would be wrong for some characters |
+| No species record at all vs. a record with some unknown fields | Shows a single "Unknown" vs. the record with each gap marked | Avoids rows of repeated "Unknown" that suggest data exists when it doesn't |
+| The API has a planet literally named `"unknown"` | Displays it as "Unknown", like every other missing value | Found by an automated test (see Quality log) |
+| Empty starship or vehicle lists don't say whether that means "none" or "not recorded" | Shows "None listed" | Neutral wording that is true in both cases |
+| Birth years use the Star Wars calendar (`19BBY`, `41.9BBY`) | Adds an "i" explaining BBY / ABY | Correct data, but unclear to non-fans |
+| Related data (species, planet, ships) arrives as links, not details | Loads them in parallel and caches every response | Keeps the page fast; revisits cost no requests |
+| The full character list (~80) comes back in one response, with no paging | Loads the list once when the page opens | Simple and instant at this size |
+| The API has no search feature | Filters the loaded list in the browser, ignoring case and accents | Instant results with no extra requests |
+| One film list covers the whole saga | Shows all films and dims the ones the character isn't in, as in the wireframe | One shared request instead of one per film |
+| The original swapi.dev returns lists in pages (`{ results }`); swapi.info returns plain lists | The client accepts both | Switching API hosts won't break the app |
+| A free third-party API can be slow or down | 10-second timeout, a clear error and "Try again". No stand-in data is ever shown | Users always know what happened |
+| A single related item can fail while others load | Shows the items that loaded, plus "1 of 2 could not be loaded" | One bad link doesn't blank a whole section |
 
 ---
 
