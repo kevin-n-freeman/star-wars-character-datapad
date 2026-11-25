@@ -43,3 +43,23 @@ describe('App: character list', () => {
     expect(screen.getByRole('button', { name: 'Luke Skywalker' })).toHaveAttribute('aria-pressed', 'true')
   })
 })
+
+describe('App: search', () => {
+  it('filters the list as the user types and shows a no-match message', async () => {
+    const user = userEvent.setup()
+    const client = createFakeClient({
+      people: [makePerson({ name: 'Luke Skywalker' }), makePerson({ name: 'Han Solo' })],
+    })
+    render(<App client={client} />)
+    await screen.findByRole('button', { name: 'Luke Skywalker' })
+
+    const search = screen.getByRole('searchbox', { name: /search characters/i })
+    await user.type(search, 'han')
+    expect(screen.queryByRole('button', { name: 'Luke Skywalker' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Han Solo' })).toBeInTheDocument()
+
+    await user.clear(search)
+    await user.type(search, 'jabba')
+    expect(screen.getByText(/no characters match "jabba"/i)).toBeInTheDocument()
+  })
+})

@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import type { SwapiClient } from './api/swapiClient'
 import type { SwapiPerson } from './api/types'
 import { CharacterList } from './components/CharacterList'
+import { SearchBox } from './components/SearchBox'
 import { StatusMessage } from './components/StatusMessage'
+import { filterCharacters } from './domain/search'
 import { useAsync } from './hooks/useAsync'
 import './App.css'
 
@@ -14,6 +16,7 @@ interface AppProps {
 export default function App({ client }: AppProps) {
   const people = useAsync(() => client.getPeople(), [client])
   const [selected, setSelected] = useState<SwapiPerson | null>(null)
+  const [query, setQuery] = useState('')
 
   const sortedPeople = useMemo(
     () =>
@@ -22,11 +25,13 @@ export default function App({ client }: AppProps) {
         : [],
     [people],
   )
+  const visiblePeople = useMemo(() => filterCharacters(sortedPeople, query), [sortedPeople, query])
 
   return (
     <div className="app">
       <header className="app__header">
         <h1>Star Wars Character Datapad</h1>
+        <SearchBox value={query} onChange={setQuery} />
       </header>
 
       <main className="app__main">
@@ -42,9 +47,12 @@ export default function App({ client }: AppProps) {
             {people.status === 'success' && sortedPeople.length === 0 && (
               <StatusMessage kind="empty" message="No characters are available." />
             )}
-            {people.status === 'success' && sortedPeople.length > 0 && (
+            {people.status === 'success' && sortedPeople.length > 0 && visiblePeople.length === 0 && (
+              <StatusMessage kind="empty" message={`No characters match "${query.trim()}".`} />
+            )}
+            {people.status === 'success' && visiblePeople.length > 0 && (
               <CharacterList
-                characters={sortedPeople}
+                characters={visiblePeople}
                 selectedUrl={selected?.url ?? null}
                 onSelect={setSelected}
               />
