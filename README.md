@@ -26,6 +26,7 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 - [Risks and limitations](#risks-and-limitations)
 - [What I would do next](#what-i-would-do-next)
 - [How AI was used and validated](#how-ai-was-used-and-validated)
+- [Quality log](#quality-log-issues-found-and-how-they-were-resolved)
 - [Guidance for the next engineer](#guidance-for-the-next-engineer)
 
 ---
@@ -192,6 +193,20 @@ In priority order:
 - **Corrections during review:** for example, a test for an "unknown" homeworld caught that card titles showed the raw API text "unknown" instead of "Unknown", which was then fixed. Also, the linter flagged that the first version of the loading hook updated state in a way React discourages. It was rewritten so a slow response for a previous character can never overwrite the current one, and a test was added to prove it.
 
 **Accountability.** I reviewed the code with the agent explaining each part in plain language, and I can walk through the architecture, testing strategy and tradeoffs described here.
+
+## Quality log: issues found and how they were resolved
+
+Every push runs lint, type checks, all tests and a production build in GitHub Actions. The full run history is under the repository's [Actions tab](https://github.com/kevin-n-freeman/star-wars-character-datapad/actions). The issues below were caught by those checks or by my review, and each was resolved before being accepted.
+
+| # | Found by | What was found | How it was resolved | Commit |
+|---|---|---|---|---|
+| 1 | Linter | The first version of the loading hook updated React state in a way React discourages, which could cause extra re-renders | Hook rewritten so results are tied to the request that produced them. Added a test proving a slow response for a previous character can never overwrite the current one | `eb50ce5` |
+| 2 | Delivery lead review | The wireframe shows Luke as "Human", but the API returns no species for him | Adopted one display rule for missing data ("Unknown" for single values, "None listed" for empty lists) rather than inventing data. Documented as a Finding at the top of this README | `1fe363f` |
+| 3 | Automated test | A new test for an unknown homeworld failed: card titles showed the API's raw text "unknown" | Titles now use the same formatting as other values and display "Unknown" | `1fe363f` |
+| 4 | Delivery lead review | "Single-page view" could be read as Luke's page only | Clarified as one screen layout for any character, and added a requirements coverage table | `b41f05e` |
+| 5 | Delivery lead review | Work plan notes read like a list of problems rather than design reasons | Column renamed "Why it matters" and entries reworded | `8e5b0dc` |
+| 6 | Delivery lead review | Risk that readers think sample data could be shown to users when the API is down | Clarified that sample data is used only by the tests; the app always uses the live API and shows an error instead | `8e5b0dc` |
+| 7 | GitHub Actions | One manual GitHub Pages deployment failed with a temporary GitHub error (deployment artifact not found) | Re-ran the deployment with no code change; it succeeded | n/a |
 
 ## Guidance for the next engineer
 
