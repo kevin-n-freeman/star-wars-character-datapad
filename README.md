@@ -6,6 +6,12 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 
 > **How this was built.** I completed this exercise in the persona agreed with LiminalArc: a **delivery lead directing a developer**. I planned and prioritized the work as GitHub issues with estimates, set the requirements and acceptance criteria, and reviewed, tested and accepted each piece. An AI coding agent (Claude) acted as the developer and wrote the code under that direction. Every commit is marked as co-authored by Claude. See [How AI was used](#how-ai-was-used-and-validated).
 
+> **Finding: the wireframe and the API disagree.** The wireframe shows Luke Skywalker's species as "Human", but the API returns *no* species for him (it leaves species empty for most humans). Rather than invent data the API doesn't provide, the app follows one consistent display rule:
+>
+> - **"Unknown"** for a single value that is missing or marked unknown: attributes, species, homeworld and homeworld details. Every character has a species and a homeworld; we just aren't told which.
+> - **"None listed"** for an empty list: films, starships and vehicles. An empty list may mean "pilots nothing" or "not recorded", and the API doesn't say which, so the wording claims neither.
+> - **"N/A"** where the API says a value doesn't apply (for example, a droid's hair color).
+
 ---
 
 ## Contents
@@ -55,7 +61,9 @@ npm test            # run the full suite once
 npm run test:watch  # re-run tests as files change
 ```
 
-The tests never call the real API. They use an in-memory fake client (`src/test/fakeClient.ts`) or a mocked `fetch`, so they are fast and repeatable and don't fail when swapi.info is slow or down. GitHub Actions runs lint, type check, tests and build on every push (`.github/workflows/ci.yml`).
+The tests never call the real API. They use an in-memory fake client (`src/test/fakeClient.ts`) or a mocked `fetch`, so they are fast and repeatable and don't fail when swapi.info is slow or down.
+
+**The sample data is used only by the tests, never by the running app.** The app always shows live data from swapi.info. If the API is unavailable, users see a clear error with a "Try again" button, never stand-in or outdated data. The tests check *behavior* (does the page display what it receives, handle missing values and show errors correctly), not whether the API's facts are correct. GitHub Actions runs lint, type check, tests and build on every push (`.github/workflows/ci.yml`).
 
 ---
 
@@ -77,17 +85,17 @@ The tests never call the real API. They use an in-memory fake client (`src/test/
 
 The work was broken into GitHub issues, each estimated before starting and closed by the commit that delivered it.
 
-| Issue | Scope | Estimate | Key risk or note |
+| Issue | Scope | Estimate | Why it matters |
 |---|---|---|---|
-| #1 | Project setup: React + TypeScript, test runner, CI | 0.5 h | Mainstream stack to keep the team learning curve low |
-| #2 | API layer: one module for all API calls, with error handling and caching | 1.0 h | **Main risk:** related data is linked by URL, so one character can trigger 10+ requests |
-| #3 | Character list and selection, with loading, empty and error states | 0.5 h | The API returns all ~80 characters at once (no paging) |
-| #4 | Character search | 0.5 h | The API has no search endpoint |
-| #5 | Details: attributes, species, homeworld | 1.0 h | "unknown" / "n/a" values; species is often empty |
-| #6 | Films, starships and vehicles | 1.0 h | Many characters pilot nothing, so empty states matter |
-| #7 | Automated tests for the API layer and key screens | 1.0 h | Tests must not depend on the live API |
-| #8 | README | 0.5 h | Required deliverable |
-| #9 | *Stretch:* live demo on GitHub Pages | 0.5 h | Lets reviewers try it without installing anything |
+| #1 | Project setup: React + TypeScript, test runner, CI | 0.5 h | A widely used stack, so any team can maintain it |
+| #2 | API layer: one module for all API calls, with error handling and caching | 1.0 h | The API returns related data as links, so one character needs several requests (about 8 for Luke). Loading them in parallel and caching keeps the page fast |
+| #3 | Character list and selection, with loading, empty and error states | 0.5 h | The API returns all ~80 characters in one response, so the list loads once and stays fast |
+| #4 | Character search | 0.5 h | The API has no search feature, so search filters the loaded list in the browser, instantly |
+| #5 | Details: attributes, species, homeworld | 1.0 h | The API often marks values unknown or leaves species empty, so values are shown consistently as "Unknown" (see Finding above) |
+| #6 | Films, starships and vehicles | 1.0 h | Many characters have no starships or vehicles listed, so each section shows "None listed" rather than an empty box |
+| #7 | Automated tests for the API layer and key screens | 1.0 h | Tests use saved sample data so they give the same result every run, even if the API is slow or down |
+| #8 | README | 0.5 h | Required: install, run and test instructions, plus decisions and tradeoffs |
+| #9 | *Stretch:* live demo on GitHub Pages | 0.5 h | Bonus: reviewers can try the app in a browser without installing it. Install steps remain in this README |
 
 **Total estimate:** about 6.5 hours, more than the "few hours" guidance. I treated #1–#8 as the core and #9 as a stretch goal, and wrote tests alongside each feature rather than leaving them to the end.
 
@@ -141,10 +149,10 @@ src/
 
 ## Assumptions
 
-- **Species is often empty in the API.** SWAPI leaves the species list empty for most humans, including Luke Skywalker, even though the wireframe shows "Human". I show "No species listed for this character" rather than assuming "Human". The data doesn't say it, and guessing would be wrong for some characters. If the product owner prefers, defaulting empty species to "Human" is a one-line change in `CharacterDetails.tsx`.
+- **Empty species means "not provided", not "no species".** The API leaves species empty for most humans, including Luke Skywalker, even though the wireframe shows "Human". The app shows "Unknown" rather than guessing "Human", because guessing would be wrong for some characters. If the product owner prefers, defaulting empty species to "Human" is a small change in `CharacterDetails.tsx`.
 - **swapi.info returns full lists, not pages.** The client also accepts the paginated `{ results }` shape used by the original swapi.dev, so switching hosts won't break it.
 - **The character list is small enough to load at once** (~80 records), which is what makes browser-side search reasonable.
-- **"unknown", "n/a" and empty values** are shown as "Unknown", "N/A" and "None" rather than raw API text.
+- **Missing values follow one display rule** ("Unknown", "None listed", "N/A"), described in the Finding at the top, so users never see raw API text like "unknown" or blank boxes.
 - **Desktop-first layout** matching the wireframe, with simple stacking for narrow screens. Full mobile design was out of scope.
 - **The list starts with no character selected,** with a prompt to choose one. The wireframe shows Luke selected, but that appears to be illustrative.
 
@@ -166,7 +174,7 @@ In priority order:
 3. **Add a small set of real-browser end-to-end tests** (Playwright) for the main journey, plus an automated accessibility check (axe).
 4. **Keyboard navigation in the character list** (arrow keys) and an accessibility review with a screen reader.
 5. **Typo-tolerant search,** so "Chewbaca" still finds Chewbacca.
-6. **Product decision on empty species** (show "Human" or keep "No species listed"), confirmed with the product owner.
+6. **Product decision on empty species** (show "Human" or keep "Unknown"), confirmed with the product owner.
 
 ## How AI was used and validated
 
@@ -176,12 +184,12 @@ In priority order:
 - Decomposed the work into issues with estimates and identified the risks up front (request volume, missing data, API reliability).
 - Set the requirements for each issue: wireframe fidelity; loading, empty and error states; and tests that never depend on the live API.
 - Reviewed each change before accepting it, ran the tests, and checked the app visually against the wireframe.
-- Made the judgment calls, for example showing "No species listed" rather than guessing "Human", and keeping the dependency list small.
+- Made the judgment calls, for example the display rule for missing data ("Unknown" for single values, "None listed" for empty lists) rather than guessing "Human", and keeping the dependency list small.
 
 **How the output was validated:**
-- **Automated checks on every change:** lint, type check, 38 tests, and a production build. GitHub Actions repeats these on every push.
+- **Automated checks on every change:** lint, type check, 40 tests, and a production build. GitHub Actions repeats these on every push.
 - **Visual check:** the built app was run against local sample data in Chrome and compared with the wireframe.
-- **Corrections during review:** for example, the linter flagged that the first version of the loading hook updated state in a way React discourages. It was rewritten so a slow response for a previous character can never overwrite the current one, and a test was added to prove it.
+- **Corrections during review:** for example, a test for an "unknown" homeworld caught that card titles showed the raw API text "unknown" instead of "Unknown", which was then fixed. Also, the linter flagged that the first version of the loading hook updated state in a way React discourages. It was rewritten so a slow response for a previous character can never overwrite the current one, and a test was added to prove it.
 
 **Accountability.** I reviewed the code with the agent explaining each part in plain language, and I can walk through the architecture, testing strategy and tradeoffs described here.
 
