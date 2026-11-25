@@ -175,6 +175,20 @@ src/
 | **No routing or state library** | One page with two pieces of state (selected character, search text), so plain React state is enough. | React Router (useful later for shareable links per character); Redux/Zustand (unneeded at this size) |
 | **Placeholders instead of images** | The instructions say images are optional, and SWAPI doesn't provide any. | Third-party image sources (licensing and reliability risk) |
 
+### Decision: "Unknown" species, even when the answer seems obvious
+
+Showing Han Solo's or Luke Skywalker's species as "Unknown" feels wrong. Everyone knows they are human. The API simply doesn't record it. I weighed three options:
+
+| Option | Pros | Cons |
+|---|---|---|
+| 1. Treat every empty species as "Human" | Looks right for Han and Luke | Becomes silently wrong for any non-human character the API left blank. The app would be stating something its data source does not |
+| 2. Keep a hand-maintained list of characters known to be human | Correct for the characters on the list | A growing list of exceptions that someone has to maintain. It drifts from the source data, and every new character needs a manual decision |
+| 3. **Show "Unknown" consistently** *(chosen)* | One simple rule, applied everywhere. The app never claims more than the data says | Some results look odd to fans, as with Han Solo |
+
+**Why option 3:** consistency and maintainability. One rule covers every character, today and as more are added, with no exception list to maintain. The app is only as accurate as its data source, and it says so plainly instead of hiding gaps.
+
+**If the business wants "Human" shown:** the right fix is at the data level, not in the screen code. That could be a product-owner decision to apply one documented default (a single change in one place) or a small data-enrichment step. Either way the rule stays in one place and is easy to find, test and reverse.
+
 ## Assumptions
 
 - **Empty species means "not provided", not "no species".** The API leaves species empty for most humans, including Luke Skywalker, even though the wireframe shows "Human". The app shows "Unknown" rather than guessing "Human", because guessing would be wrong for some characters. If the product owner prefers, defaulting empty species to "Human" is a small change in `CharacterDetails.tsx`.
@@ -202,7 +216,8 @@ In priority order:
 3. **Add a small set of real-browser end-to-end tests** (Playwright) for the main journey, plus an automated accessibility check (axe).
 4. **Keyboard navigation in the character list** (arrow keys) and an accessibility review with a screen reader.
 5. **Typo-tolerant search,** so "Chewbaca" still finds Chewbacca.
-6. **Product decision on empty species** (show "Human" or keep "Unknown"), confirmed with the product owner.
+6. **Product decision on empty species** (show "Human" or keep "Unknown"), confirmed with the product owner. If "Human" is preferred, apply it once at the data level (see the decision above), not as per-character exceptions.
+7. **Explain "Unknown" where it might surprise users,** for example a small note that the Star Wars API does not record a species for this character.
 
 ## How AI was used and validated
 
