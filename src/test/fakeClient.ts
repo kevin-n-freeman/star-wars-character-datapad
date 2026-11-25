@@ -1,5 +1,5 @@
 import type { ManyResult, SwapiClient } from '../api/swapiClient'
-import type { SwapiPerson } from '../api/types'
+import type { SwapiFilm, SwapiPerson } from '../api/types'
 
 /**
  * In-memory stand-in for the real API client. Tests describe the data they
@@ -7,6 +7,7 @@ import type { SwapiPerson } from '../api/types'
  */
 export function createFakeClient(options: {
   people?: SwapiPerson[] | Error
+  films?: SwapiFilm[] | Error
   resources?: Record<string, unknown>
 }): SwapiClient {
   const resources = options.resources ?? {}
@@ -23,6 +24,11 @@ export function createFakeClient(options: {
       const people = options.people ?? []
       if (people instanceof Error) throw people
       return people
+    },
+    async getFilms() {
+      const films = options.films ?? []
+      if (films instanceof Error) throw films
+      return films
     },
     getResource,
     async getMany<T>(urls: string[]): Promise<ManyResult<T>> {

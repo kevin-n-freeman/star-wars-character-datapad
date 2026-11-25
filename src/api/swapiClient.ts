@@ -1,4 +1,4 @@
-import type { SwapiPerson } from './types'
+import type { SwapiFilm, SwapiPerson } from './types'
 
 export const DEFAULT_BASE_URL = 'https://swapi.info/api'
 const DEFAULT_TIMEOUT_MS = 10_000
@@ -22,6 +22,7 @@ export interface ManyResult<T> {
 
 export interface SwapiClient {
   getPeople(): Promise<SwapiPerson[]>
+  getFilms(): Promise<SwapiFilm[]>
   getResource<T>(url: string): Promise<T>
   getMany<T>(urls: string[]): Promise<ManyResult<T>>
 }
@@ -80,16 +81,19 @@ export function createSwapiClient(options: SwapiClientOptions = {}): SwapiClient
     return pending as Promise<T>
   }
 
-  async function getPeople(): Promise<SwapiPerson[]> {
-    const data = await getResource<unknown>(`${baseUrl}/people`)
+  async function getList<T>(collection: string): Promise<T[]> {
+    const data = await getResource<unknown>(`${baseUrl}/${collection}`)
     // swapi.info returns a plain array. The original swapi.dev returns
     // { results: [...] }; accept both so a base URL switch does not break us.
-    if (Array.isArray(data)) return data as SwapiPerson[]
+    if (Array.isArray(data)) return data as T[]
     if (data && typeof data === 'object' && Array.isArray((data as { results?: unknown }).results)) {
-      return (data as { results: SwapiPerson[] }).results
+      return (data as { results: T[] }).results
     }
     throw new ApiError('The Star Wars API returned data in an unexpected format.')
   }
+
+  const getPeople = () => getList<SwapiPerson>('people')
+  const getFilms = () => getList<SwapiFilm>('films')
 
   async function getMany<T>(urls: string[]): Promise<ManyResult<T>> {
     const settled = await Promise.allSettled(urls.map((url) => getResource<T>(url)))
@@ -102,5 +106,5 @@ export function createSwapiClient(options: SwapiClientOptions = {}): SwapiClient
     return { items, failedCount }
   }
 
-  return { getPeople, getResource, getMany }
+  return { getPeople, getFilms, getResource, getMany }
 }

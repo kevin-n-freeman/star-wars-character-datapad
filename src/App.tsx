@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { SwapiClient } from './api/swapiClient'
 import type { SwapiPerson } from './api/types'
 import { CharacterDetails } from './components/CharacterDetails'
+import { RelatedInfo } from './components/RelatedInfo'
 import { CharacterList } from './components/CharacterList'
 import { SearchBox } from './components/SearchBox'
 import { StatusMessage } from './components/StatusMessage'
@@ -71,6 +72,8 @@ export default function App({ client }: AppProps) {
           </div>
         </section>
       </main>
+
+      {selected && <RelatedInfo key={selected.url} person={selected} client={client} />}
     </div>
   )
 }

@@ -32,6 +32,14 @@ describe('createSwapiClient', () => {
     await expect(client.getPeople()).rejects.toThrow(/unexpected format/i)
   })
 
+  it('loads the film list from the films collection', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(jsonResponse([{ title: 'A New Hope', episode_id: 4 }]))
+    const client = createSwapiClient({ fetchFn, baseUrl: 'https://example.test/api' })
+
+    await expect(client.getFilms()).resolves.toEqual([{ title: 'A New Hope', episode_id: 4 }])
+    expect(fetchFn).toHaveBeenCalledWith('https://example.test/api/films', expect.any(Object))
+  })
+
   it('caches responses so the same URL is only requested once', async () => {
     const fetchFn = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ name: 'Tatooine' })))
     const client = createSwapiClient({ fetchFn })
