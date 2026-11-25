@@ -12,6 +12,7 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 
 - [Running the app](#running-the-app)
 - [Running the tests](#running-the-tests)
+- [Requirements coverage](#requirements-coverage)
 - [Work plan](#work-plan)
 - [Technical approach and architecture](#technical-approach-and-architecture)
 - [Key decisions, tradeoffs and alternatives](#key-decisions-tradeoffs-and-alternatives)
@@ -58,6 +59,20 @@ The tests never call the real API. They use an in-memory fake client (`src/test/
 
 ---
 
+## Requirements coverage
+
+| Requirement from the exercise | Where it is delivered |
+|---|---|
+| View a list of characters | #3: sorted, scrollable list |
+| Search for a character | #4: filters as you type; clear message when nothing matches |
+| Select a character and view details, species and homeworld | #3 (selection) and #5 (attributes, species, homeworld) |
+| View films, starships and vehicles | #6 |
+| Clearly communicate loading, empty and error states | Acceptance criteria on #3, #4, #5 and #6, with error handling and retries in #2 |
+
+"Single-page view" is read as one screen layout that works for any character, with Luke Skywalker as the wireframe's example. Films, starships and vehicles are shown on that page, not on separate pages, per the instructions.
+
+---
+
 ## Work plan
 
 The work was broken into GitHub issues, each estimated before starting and closed by the commit that delivered it.
@@ -66,7 +81,7 @@ The work was broken into GitHub issues, each estimated before starting and close
 |---|---|---|---|
 | #1 | Project setup: React + TypeScript, test runner, CI | 0.5 h | Mainstream stack to keep the team learning curve low |
 | #2 | API layer: one module for all API calls, with error handling and caching | 1.0 h | **Main risk:** related data is linked by URL, so one character can trigger 10+ requests |
-| #3 | Character list with loading, empty and error states | 0.5 h | The API returns all ~80 characters at once (no paging) |
+| #3 | Character list and selection, with loading, empty and error states | 0.5 h | The API returns all ~80 characters at once (no paging) |
 | #4 | Character search | 0.5 h | The API has no search endpoint |
 | #5 | Details: attributes, species, homeworld | 1.0 h | "unknown" / "n/a" values; species is often empty |
 | #6 | Films, starships and vehicles | 1.0 h | Many characters pilot nothing, so empty states matter |
@@ -150,7 +165,8 @@ In priority order:
 2. **Adopt TanStack Query** if the app grows. It would replace `useAsync` and the hand-written cache with a well-tested library (background refresh, cache limits, request cancellation).
 3. **Add a small set of real-browser end-to-end tests** (Playwright) for the main journey, plus an automated accessibility check (axe).
 4. **Keyboard navigation in the character list** (arrow keys) and an accessibility review with a screen reader.
-5. **Product decision on empty species** (show "Human" or keep "No species listed"), confirmed with the product owner.
+5. **Typo-tolerant search,** so "Chewbaca" still finds Chewbacca.
+6. **Product decision on empty species** (show "Human" or keep "No species listed"), confirmed with the product owner.
 
 ## How AI was used and validated
 
