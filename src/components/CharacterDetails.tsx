@@ -58,15 +58,10 @@ export function CharacterDetails({ person, client }: Props) {
 function SpeciesCard({ urls, client }: { urls: string[]; client: SwapiClient }) {
   const species = useAsync(() => client.getMany<SwapiSpecies>(urls), [client, urls.join('|')])
 
-  // SWAPI leaves species empty for most humans (e.g. Luke Skywalker).
-  // We show that honestly instead of guessing "Human" (see README).
-  if (urls.length === 0) {
-    return (
-      <div className="card">
-        <StatusMessage kind="empty" message="No species listed for this character." />
-      </div>
-    )
-  }
+  // SWAPI leaves species empty for most humans (e.g. Luke Skywalker), so an
+  // empty list means the data is missing, not that there is no species.
+  // Display rule: missing single values show "Unknown" (see README).
+  if (urls.length === 0) return <UnknownCard />
   if (species.status === 'loading') return <StatusMessage kind="loading" message="Loading species…" />
   if (species.status === 'error' || species.data.items.length === 0) {
     return <StatusMessage kind="error" message="Species details could not be loaded." onRetry={species.retry} />
@@ -75,7 +70,7 @@ function SpeciesCard({ urls, client }: { urls: string[]; client: SwapiClient }) 
     <>
       {species.data.items.map((s) => (
         <div className="card" key={s.url}>
-          <h4 className="card__title">{s.name}</h4>
+          <h4 className="card__title">{formatText(s.name)}</h4>
           <InfoTable
             rows={[
               ['Classification', formatText(s.classification)],
@@ -91,6 +86,14 @@ function SpeciesCard({ urls, client }: { urls: string[]; client: SwapiClient }) 
   )
 }
 
+function UnknownCard() {
+  return (
+    <div className="card">
+      <h4 className="card__title">Unknown</h4>
+    </div>
+  )
+}
+
 function HomeworldCard({ url, client }: { url: string; client: SwapiClient }) {
   const planet = useAsync(
     () => (url ? client.getResource<SwapiPlanet>(url) : Promise.resolve(null)),
@@ -101,17 +104,12 @@ function HomeworldCard({ url, client }: { url: string; client: SwapiClient }) {
   if (planet.status === 'error') {
     return <StatusMessage kind="error" message="Homeworld details could not be loaded." onRetry={planet.retry} />
   }
-  if (!planet.data) {
-    return (
-      <div className="card">
-        <StatusMessage kind="empty" message="No homeworld listed for this character." />
-      </div>
-    )
-  }
+  // Every character has a homeworld; if none is given we just aren't told which.
+  if (!planet.data) return <UnknownCard />
   const p = planet.data
   return (
     <div className="card">
-      <h4 className="card__title">{p.name}</h4>
+      <h4 className="card__title">{formatText(p.name)}</h4>
       <InfoTable
         rows={[
           ['Population', formatNumber(p.population)],

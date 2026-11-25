@@ -51,7 +51,7 @@ describe('RelatedInfo', () => {
     expect(await within(starships).findByText('X-wing')).toBeInTheDocument()
     expect(within(starships).getByText('1 / 0')).toBeInTheDocument()
     expect(within(starships).getByText('T-65 X-wing / Incom Corporation')).toBeInTheDocument()
-    expect(within(region(/vehicles/i)).getByText(/does not pilot any vehicles/i)).toBeInTheDocument()
+    expect(within(region(/vehicles/i)).getByText('None listed')).toBeInTheDocument()
   })
 
   it('still shows the starships that loaded when one fails', async () => {
@@ -62,6 +62,12 @@ describe('RelatedInfo', () => {
     const starships = region(/starships/i)
     expect(await within(starships).findByText('X-wing')).toBeInTheDocument()
     expect(within(starships).getByText(/1 of 2 starships could not be loaded/i)).toBeInTheDocument()
+  })
+
+  it('shows "None listed" when the character has no films', async () => {
+    render(<RelatedInfo person={makePerson({ name: 'Nobody', films: [] })} client={createFakeClient({ films })} />)
+
+    expect(await within(region(/films/i)).findByText('None listed')).toBeInTheDocument()
   })
 
   it('shows a retryable error when the film list fails', async () => {

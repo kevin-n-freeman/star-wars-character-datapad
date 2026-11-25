@@ -25,7 +25,7 @@ export function FilmStrip({ filmUrls, client }: Props) {
   const appearsIn = new Set(filmUrls)
   const ordered = [...films.data].sort((a: SwapiFilm, b: SwapiFilm) => a.episode_id - b.episode_id)
   if (appearsIn.size === 0) {
-    return <StatusMessage kind="empty" message="This character does not appear in any films." />
+    return <StatusMessage kind="empty" message="None listed" />
   }
 
   return (

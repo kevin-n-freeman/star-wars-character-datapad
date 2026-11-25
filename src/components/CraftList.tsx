@@ -16,7 +16,9 @@ export function CraftList({ urls, client, label }: Props) {
   const crafts = useAsync(() => client.getMany<SwapiCraft>(urls), [client, urls.join('|')])
 
   if (urls.length === 0) {
-    return <StatusMessage kind="empty" message={`This character does not pilot any ${label}.`} />
+    // An empty list can mean "pilots nothing" or "not recorded"; the API does
+    // not say which, so we use the neutral "None listed" (see README).
+    return <StatusMessage kind="empty" message="None listed" />
   }
   if (crafts.status === 'loading') return <StatusMessage kind="loading" message={`Loading ${label}…`} />
   if (crafts.status === 'error' || crafts.data.items.length === 0) {

@@ -54,12 +54,22 @@ describe('CharacterDetails', () => {
     expect(within(attributes).getByText('N/A')).toBeInTheDocument()
   })
 
-  it('explains when no species or homeworld is listed', async () => {
+  it('shows "Unknown" when no species or homeworld is given', async () => {
     const person = makePerson({ name: 'Luke Skywalker', species: [], homeworld: '' })
     render(<CharacterDetails person={person} client={createFakeClient({})} />)
 
-    expect(within(section(/species/i)).getByText(/no species listed/i)).toBeInTheDocument()
-    expect(await within(section(/homeworld/i)).findByText(/no homeworld listed/i)).toBeInTheDocument()
+    expect(within(section(/species/i)).getByText('Unknown')).toBeInTheDocument()
+    expect(await within(section(/homeworld/i)).findByText('Unknown')).toBeInTheDocument()
+  })
+
+  it('shows "Unknown" for homeworld details the API does not know', async () => {
+    const person = makePerson({ name: 'Mystery', homeworld: TATOOINE })
+    const unknownPlanet = { ...tatooine, name: 'unknown', population: 'unknown', terrain: 'unknown', climate: '' }
+    render(<CharacterDetails person={person} client={createFakeClient({ resources: { [TATOOINE]: unknownPlanet } })} />)
+
+    const homeworld = section(/homeworld/i)
+    await within(homeworld).findByText('Population')
+    expect(within(homeworld).getAllByText('Unknown').length).toBeGreaterThanOrEqual(4)
   })
 
   it('shows a retryable error when the homeworld fails to load', async () => {

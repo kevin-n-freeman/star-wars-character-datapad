@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import { ApiError } from './api/swapiClient'
@@ -94,6 +94,6 @@ describe('App: end-to-end flow with a fake API', () => {
     expect(await screen.findByText('Tatooine')).toBeInTheDocument()
     expect(await screen.findByText('A New Hope')).toBeInTheDocument()
     expect(await screen.findByText('X-wing')).toBeInTheDocument()
-    expect(screen.getByText(/does not pilot any vehicles/i)).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: /vehicles/i })).getByText('None listed')).toBeInTheDocument()
   })
 })
