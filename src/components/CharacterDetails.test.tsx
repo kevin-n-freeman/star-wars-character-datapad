@@ -45,6 +45,14 @@ describe('CharacterDetails', () => {
     expect(within(section(/homeworld/i)).getByText('10,465 km')).toBeInTheDocument()
   })
 
+  it('explains the Star Wars birth-year format (BBY / ABY)', () => {
+    render(<CharacterDetails person={makePerson({ name: 'Luke Skywalker' })} client={createFakeClient({})} />)
+
+    const attributes = section(/attributes/i)
+    expect(within(attributes).getByText('19BBY')).toBeInTheDocument()
+    expect(within(attributes).getByText(/years before \/ after the Battle of Yavin/i)).toBeInTheDocument()
+  })
+
   it('shows "Unknown" instead of raw API placeholders', () => {
     const person = makePerson({ name: 'Mystery', mass: 'unknown', hair_color: 'n/a' })
     render(<CharacterDetails person={person} client={createFakeClient({})} />)

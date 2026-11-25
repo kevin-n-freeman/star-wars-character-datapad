@@ -26,7 +26,11 @@ export function CharacterDetails({ person, client }: Props) {
           <InfoTable
             variant="grid"
             rows={[
-              ['Birth year', formatText(person.birth_year)],
+              [
+                'Birth year',
+                formatText(person.birth_year),
+                'BBY / ABY = years before / after the Battle of Yavin, the Star Wars calendar. Luke Skywalker (19BBY) was born 19 years before it.',
+              ],
               ['Gender', formatText(person.gender)],
               ['Height', formatNumber(person.height, 'cm')],
               ['Mass', formatNumber(person.mass, 'kg')],

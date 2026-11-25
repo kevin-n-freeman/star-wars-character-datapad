@@ -318,3 +318,53 @@
 .craft__name {
   font-weight: 700;
 }
+
+.hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  border: 1px solid #7b8794;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-style: italic;
+  font-weight: 700;
+  color: #52606d;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.hint:focus-visible {
+  outline: 2px solid #2680c2;
+  outline-offset: 2px;
+}
+
+.hint::after {
+  content: attr(data-hint);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 10;
+  width: 260px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #1f2933;
+  color: #fff;
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  transform: translateX(-20%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.hint:hover::after,
+.hint:focus-visible::after {
+  opacity: 1;
+}
