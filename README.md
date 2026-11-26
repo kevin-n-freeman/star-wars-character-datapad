@@ -128,6 +128,18 @@ The work was broken into GitHub issues, each estimated before starting and close
 
 **Total estimate:** about 6.5 hours, more than the "few hours" guidance. I treated #1–#8 as the core and #9 as a stretch goal, and wrote tests alongside each feature rather than leaving them to the end.
 
+### Estimate vs. actual
+
+**The estimates above were drafted for a human developer.** They are the plan I would hand to a development team, sized for a person writing, testing and documenting each feature. The work was then carried out by an AI coding agent, so actual developer time was far lower. My own time went into planning, review and decisions.
+
+| Work | Estimate | Actual | How the actual was measured |
+|---|---|---|---|
+| Developer build: issues #1–#9 (code, 41 tests, README, live demo) | 6.5 h (human developer) | **About 15 minutes** (Nov 25, 3:58–4:11 pm CT) | Commit timestamps in this repository |
+| Delivery lead review: testing the live demo as a user, product decisions and the resulting changes (display rules, birth-year hint, "Unknown" species decision, RAID log) | Not estimated | **About 1 hour** (Nov 25, ~5:15–6:10 pm CT) | Commit timestamps for the 11 resulting commits (5:39–6:10 pm), plus review time before the first one |
+| Delivery lead planning, setup and code walkthrough | Not estimated | **About 2 hours** | Working-session times; this work produces no commits |
+
+**What this shows:** with an AI agent as the developer, build time collapses from hours to minutes. The work that still takes time, and still needs a person, is deciding what to build, defining what "done" means, testing the result the way a user would, and making the product judgment calls. In this exercise, those steps produced every one of the findings in the [Quality log](#quality-log-issues-found-and-how-they-were-resolved) that came from review. I kept the original human-developer estimates in place rather than revising them after the fact, so the plan and the actual can be compared honestly.
+
 ---
 
 ## Technical approach and architecture
