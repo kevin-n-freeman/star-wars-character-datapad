@@ -209,7 +209,7 @@ Showing Han Solo's or Luke Skywalker's species as "Unknown" feels wrong. Everyon
 
 ## What I would do next
 
-In priority order:
+The instructions note that reviewers "do not expect you to implement every improvement you identify." I implemented the improvements that affected correctness or basic usability (for example, the birth-year explanation) and recorded the rest here as improvements for future consideration, in priority order:
 
 1. **Put the selected character in the URL** (`?character=1`) so views can be shared and the back button works.
 2. **Adopt TanStack Query** if the app grows. It would replace `useAsync` and the hand-written cache with a well-tested library (background refresh, cache limits, request cancellation).
@@ -218,6 +218,7 @@ In priority order:
 5. **Typo-tolerant search,** so "Chewbaca" still finds Chewbacca.
 6. **Product decision on empty species** (show "Human" or keep "Unknown"), confirmed with the product owner. If "Human" is preferred, apply it once at the data level (see the decision above), not as per-character exceptions.
 7. **Explain "Unknown" where it might surprise users,** for example a small note that the Star Wars API does not record a species for this character.
+8. **Explain "Starships" vs. "Vehicles"** with the same "i" hint used for birth year. Identified during delivery lead review: the difference isn't obvious to non-fans. In the Star Wars API, starships have a hyperdrive for travel between star systems; vehicles operate on or near a planet (for example, the X-wing is a starship and the Snowspeeder is a vehicle, though both are made by Incom). This reuses the existing hint, so it's a small change.
 
 ## How AI was used and validated
 
