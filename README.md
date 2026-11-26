@@ -31,6 +31,7 @@ A single-page web app for exploring Star Wars characters using the [Star Wars AP
 - [How AI was used and validated](#how-ai-was-used-and-validated)
 - [Quality log](#quality-log-issues-found-and-how-they-were-resolved)
 - [Guidance for the next engineer](#guidance-for-the-next-engineer)
+- [RAID log](docs/RAID.md) (risks, assumptions, issues and dependencies, tracked in one place)
 
 ---
 
@@ -190,6 +191,8 @@ Showing Han Solo's or Luke Skywalker's species as "Unknown" feels wrong. Everyon
 **If the business wants "Human" shown:** the right fix is at the data level, not in the screen code. That could be a product-owner decision to apply one documented default (a single change in one place) or a small data-enrichment step. Either way the rule stays in one place and is easy to find, test and reverse.
 
 ## Assumptions
+
+*All assumptions, risks, issues and dependencies are tracked with owners and status in the [RAID log](docs/RAID.md). This section and the next explain the reasoning.*
 
 - **Empty species means "not provided", not "no species".** The API leaves species empty for most humans, including Luke Skywalker, even though the wireframe shows "Human". The app shows "Unknown" rather than guessing "Human", because guessing would be wrong for some characters. If the product owner prefers, defaulting empty species to "Human" is a small change in `CharacterDetails.tsx`.
 - **swapi.info returns full lists, not pages.** The client also accepts the paginated `{ results }` shape used by the original swapi.dev, so switching hosts won't break it.
